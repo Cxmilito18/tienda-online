@@ -74,6 +74,8 @@ const FORM_VACIO = {
   precio: '',
   categoria_id: '',
   imagen_url: '',
+  stock: '',
+  stock_minimo: '',
 }
 
 function AdminPanel() {
@@ -84,6 +86,11 @@ function AdminPanel() {
   // formulario (sirve para crear Y editar)
   const [form, setForm] = useState(FORM_VACIO)
   const editando = form.id !== null
+
+  // productos cuyo stock cayó a su mínimo (o menos)
+  const porReabastecer = productos.filter(
+    (p) => (p.stock ?? 0) <= (p.stock_minimo ?? 0)
+  )
 
   const [modoImg, setModoImg] = useState('archivo')
   const [archivo, setArchivo] = useState(null)
@@ -145,6 +152,8 @@ function AdminPanel() {
       precio: String(p.precio),
       categoria_id: p.categoria_id || '',
       imagen_url: p.imagen_url || '',
+      stock: String(p.stock ?? ''),
+      stock_minimo: String(p.stock_minimo ?? ''),
     })
     setPreviewUrl(p.imagen_url || '')
     setUrlImg('')
@@ -194,6 +203,8 @@ function AdminPanel() {
         precio: Number(form.precio),
         categoria_id: form.categoria_id || null,
         imagen_url,
+        stock: Number(form.stock) || 0,
+        stock_minimo: Number(form.stock_minimo) || 0,
       }
 
       if (editando) {
@@ -253,6 +264,31 @@ function AdminPanel() {
         </button>
       </div>
       <p className="sub">Gestiona productos y categorías de tu tienda.</p>
+
+      {/* ---- ALERTA DE REABASTECIMIENTO ---- */}
+      {porReabastecer.length > 0 && (
+        <div className="restock-alert">
+          <strong>
+            ⚠️ {porReabastecer.length}{' '}
+            {porReabastecer.length === 1
+              ? 'producto necesita'
+              : 'productos necesitan'}{' '}
+            reabastecerse
+          </strong>
+          <ul>
+            {porReabastecer.map((p) => (
+              <li key={p.id}>
+                {p.nombre} —{' '}
+                {p.stock === 0 ? (
+                  <span className="agotado">AGOTADO</span>
+                ) : (
+                  <>quedan {p.stock}</>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* ---- GESTIÓN DE CATEGORÍAS ---- */}
       <div className="form-card">
@@ -336,6 +372,29 @@ function AdminPanel() {
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+
+        <div className="row2">
+          <div className="field">
+            <label>Stock (cantidad disponible)</label>
+            <input
+              type="number"
+              min="0"
+              value={form.stock}
+              onChange={(e) => setField('stock', e.target.value)}
+              placeholder="Ej. 20"
+            />
+          </div>
+          <div className="field">
+            <label>Avisar cuando baje de</label>
+            <input
+              type="number"
+              min="0"
+              value={form.stock_minimo}
+              onChange={(e) => setField('stock_minimo', e.target.value)}
+              placeholder="Ej. 3"
+            />
           </div>
         </div>
 
@@ -434,6 +493,15 @@ function AdminPanel() {
                 <span>
                   {formatPrecio(p.precio)}
                   {p.categoria_nombre ? ` · ${p.categoria_nombre}` : ''}
+                </span>
+                <span
+                  className={`stock-tag ${
+                    (p.stock ?? 0) <= (p.stock_minimo ?? 0) ? 'bajo' : ''
+                  }`}
+                >
+                  {(p.stock ?? 0) === 0
+                    ? '● Agotado'
+                    : `● Stock: ${p.stock}`}
                 </span>
               </div>
               <div className="admin-actions">

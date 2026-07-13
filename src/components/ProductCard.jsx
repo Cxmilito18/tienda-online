@@ -7,13 +7,18 @@ const PLACEHOLDER =
 export default function ProductCard({ producto, onZoom }) {
   const { add } = useCart()
   const img = producto.imagen_url || PLACEHOLDER
+  const stock = producto.stock ?? 0
+  const stockMinimo = producto.stock_minimo ?? 0
+  const agotado = stock === 0
+  const pocasUnidades = !agotado && stock <= stockMinimo
 
   return (
-    <div className="card">
+    <div className={`card ${agotado ? 'card-agotado' : ''}`}>
       <div className="card-img" onClick={() => onZoom(img, producto.nombre)}>
         {producto.categoria_nombre && (
           <span className="card-cat">{producto.categoria_nombre}</span>
         )}
+        {agotado && <span className="card-agotado-badge">Agotado</span>}
         <img
           src={img}
           alt={producto.nombre}
@@ -28,12 +33,16 @@ export default function ProductCard({ producto, onZoom }) {
           <p className="card-desc">{producto.descripcion}</p>
         )}
         <div className="card-precio">{formatPrecio(producto.precio)}</div>
+        {pocasUnidades && (
+          <span className="card-pocas">¡Últimas {stock} unidades!</span>
+        )}
         <button
           className="btn btn-block"
           onClick={() => add(producto)}
+          disabled={agotado}
           style={{ marginTop: 6 }}
         >
-          Agregar al carrito
+          {agotado ? 'Agotado' : 'Agregar al carrito'}
         </button>
       </div>
     </div>
