@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { STORE } from '../lib/config.js'
 import ProductCard from '../components/ProductCard.jsx'
-import Lightbox from '../components/Lightbox.jsx'
 
 export default function Home() {
   const [productos, setProductos] = useState([])
@@ -11,7 +10,6 @@ export default function Home() {
   const [error, setError] = useState('')
   const [q, setQ] = useState('')
   const [catActiva, setCatActiva] = useState('todas')
-  const [zoom, setZoom] = useState(null) // {src, alt}
 
   useEffect(() => {
     cargar()
@@ -137,11 +135,7 @@ export default function Home() {
         ) : (
           <div className="grid">
             {filtrados.map((p) => (
-              <ProductCard
-                key={p.id}
-                producto={p}
-                onZoom={(src, alt) => setZoom({ src, alt })}
-              />
+              <ProductCard key={p.id} producto={p} />
             ))}
           </div>
         )}
@@ -163,14 +157,6 @@ export default function Home() {
           </a>
         </div>
       </footer>
-
-      {zoom && (
-        <Lightbox
-          src={zoom.src}
-          alt={zoom.alt}
-          onClose={() => setZoom(null)}
-        />
-      )}
     </>
   )
 }

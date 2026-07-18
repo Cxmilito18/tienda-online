@@ -76,6 +76,7 @@ const FORM_VACIO = {
   imagen_url: '',
   stock: '',
   stock_minimo: '',
+  imagenes: [], // fotos adicionales ya guardadas (URLs)
 }
 
 function AdminPanel() {
@@ -98,6 +99,9 @@ function AdminPanel() {
   const [urlImg, setUrlImg] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [msg, setMsg] = useState(null)
+
+  // fotos adicionales nuevas (archivos por subir al guardar)
+  const [nuevasFotos, setNuevasFotos] = useState([])
 
   // categorías
   const [nuevaCat, setNuevaCat] = useState('')
@@ -136,12 +140,40 @@ function AdminPanel() {
     setPreviewUrl(URL.createObjectURL(f))
   }
 
+  // Sube un archivo al Storage y devuelve su URL pública
+  async function subirArchivo(file) {
+    const ext = file.name.split('.').pop()
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const { error: upErr } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(path, file)
+    if (upErr) throw upErr
+    return supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path).data
+      .publicUrl
+  }
+
+  // --- galería (fotos adicionales) ---
+  function onNuevasFotos(e) {
+    const files = Array.from(e.target.files || [])
+    if (files.length) setNuevasFotos((prev) => [...prev, ...files])
+    e.target.value = '' // permite volver a elegir el mismo archivo
+  }
+
+  function quitarFotoExistente(url) {
+    setForm((f) => ({ ...f, imagenes: f.imagenes.filter((u) => u !== url) }))
+  }
+
+  function quitarFotoNueva(idx) {
+    setNuevasFotos((prev) => prev.filter((_, i) => i !== idx))
+  }
+
   function resetForm() {
     setForm(FORM_VACIO)
     setArchivo(null)
     setPreviewUrl('')
     setUrlImg('')
     setModoImg('archivo')
+    setNuevasFotos([])
   }
 
   function editarProducto(p) {
@@ -154,7 +186,9 @@ function AdminPanel() {
       imagen_url: p.imagen_url || '',
       stock: String(p.stock ?? ''),
       stock_minimo: String(p.stock_minimo ?? ''),
+      imagenes: p.imagenes || [],
     })
+    setNuevasFotos([])
     setPreviewUrl(p.imagen_url || '')
     setUrlImg('')
     setArchivo(null)
@@ -179,14 +213,7 @@ function AdminPanel() {
           setGuardando(false)
           return
         }
-        const ext = archivo.name.split('.').pop()
-        const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-        const { error: upErr } = await supabase.storage
-          .from(STORAGE_BUCKET)
-          .upload(path, archivo)
-        if (upErr) throw upErr
-        imagen_url = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path)
-          .data.publicUrl
+        imagen_url = await subirArchivo(archivo)
       } else if (modoImg === 'url') {
         if (!urlImg.trim()) {
           setMsg({ tipo: 'err', texto: 'Pega un link de imagen.' })
@@ -197,6 +224,13 @@ function AdminPanel() {
       }
       // modoImg === 'actual' -> conserva form.imagen_url
 
+      // Sube las fotos adicionales nuevas y las une con las ya guardadas
+      const urlsNuevas = []
+      for (const file of nuevasFotos) {
+        urlsNuevas.push(await subirArchivo(file))
+      }
+      const imagenes = [...form.imagenes, ...urlsNuevas]
+
       const payload = {
         nombre: form.nombre.trim(),
         descripcion: form.descripcion.trim(),
@@ -205,6 +239,7 @@ function AdminPanel() {
         imagen_url,
         stock: Number(form.stock) || 0,
         stock_minimo: Number(form.stock_minimo) || 0,
+        imagenes,
       }
 
       if (editando) {
@@ -453,6 +488,50 @@ function AdminPanel() {
           )}
           {modoImg === 'actual' && previewUrl && (
             <img className="preview-img" src={previewUrl} alt="actual" />
+          )}
+        </div>
+
+        {/* ---- FOTOS ADICIONALES (galería) ---- */}
+        <div className="field">
+          <label>Fotos adicionales (galería)</label>
+          <p className="hint">
+            La foto de arriba es la portada. Aquí puedes agregar más fotos
+            para que el cliente vea mejor el producto.
+          </p>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={onNuevasFotos}
+          />
+          {(form.imagenes.length > 0 || nuevasFotos.length > 0) && (
+            <div className="galeria-admin">
+              {form.imagenes.map((url) => (
+                <div className="galeria-admin-item" key={url}>
+                  <img src={url} alt="foto" />
+                  <button
+                    type="button"
+                    onClick={() => quitarFotoExistente(url)}
+                    title="Quitar"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              {nuevasFotos.map((file, i) => (
+                <div className="galeria-admin-item nueva" key={i}>
+                  <img src={URL.createObjectURL(file)} alt="nueva" />
+                  <button
+                    type="button"
+                    onClick={() => quitarFotoNueva(i)}
+                    title="Quitar"
+                  >
+                    ✕
+                  </button>
+                  <span className="badge-nueva">nueva</span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
