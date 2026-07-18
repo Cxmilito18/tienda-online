@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase, STORAGE_BUCKET } from '../lib/supabase.js'
 import { formatPrecio } from '../lib/format.js'
+import AdminResenas from '../components/AdminResenas.jsx'
 
 export default function Admin() {
   const [session, setSession] = useState(undefined) // undefined = cargando
@@ -595,6 +596,11 @@ function AdminPanel() {
           ))}
         </div>
       )}
+
+      {/* ---- MODERACIÓN DE RESEÑAS ---- */}
+      <div style={{ marginTop: 28 }}>
+        <AdminResenas />
+      </div>
     </div>
   )
 }

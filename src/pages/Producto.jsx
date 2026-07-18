@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js'
 import { formatPrecio } from '../lib/format.js'
 import { useCart } from '../context/CartContext.jsx'
 import Lightbox from '../components/Lightbox.jsx'
+import Resenas from '../components/Resenas.jsx'
 
 const PLACEHOLDER =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="600" height="600" fill="%23eef1f7"/><text x="50%" y="50%" font-size="26" fill="%23999" text-anchor="middle" dy=".3em">Sin imagen</text></svg>'
@@ -142,6 +143,8 @@ export default function Producto() {
           </button>
         </div>
       </div>
+
+      <Resenas productoId={producto.id} />
 
       {zoom && (
         <Lightbox
