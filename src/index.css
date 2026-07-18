@@ -575,6 +575,38 @@ img { display: block; max-width: 100%; }
   border-radius: 8px; font-weight: 700; font-size: 0.82rem;
 }
 
+/* ---- DESCUENTOS ---- */
+/* Etiqueta -X% en la tarjeta (esquina de la imagen) */
+.card-descuento {
+  position: absolute; top: 10px; right: 10px;
+  background: #dc2626; color: #fff; font-size: 0.78rem; font-weight: 800;
+  padding: 4px 10px; border-radius: 999px; letter-spacing: 0.02em;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.35);
+}
+/* Si un producto está agotado Y con descuento, baja la etiqueta de agotado */
+.card-descuento + .card-agotado-badge { top: 44px; }
+
+/* Precio tachado (precio viejo) */
+.precio-tachado {
+  color: var(--gris-texto); text-decoration: line-through;
+  font-weight: 600; font-size: 0.85em; margin-right: 8px;
+}
+.card-precio .precio-tachado { display: block; margin-bottom: 2px; font-size: 0.8rem; }
+
+/* Página de detalle */
+.detalle-precio-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 10px 0 6px; }
+.detalle-precio-row .detalle-precio { margin: 0; }
+.detalle-descuento {
+  background: #dc2626; color: #fff; font-size: 0.85rem; font-weight: 800;
+  padding: 3px 10px; border-radius: 999px;
+}
+
+/* Etiqueta de descuento en la lista del admin */
+.descuento-tag {
+  margin-left: 8px; background: #fee2e2; color: #dc2626;
+  font-size: 0.72rem; font-weight: 800; padding: 1px 8px; border-radius: 999px;
+}
+
 @media (max-width: 860px) {
   .beneficios-grid { grid-template-columns: repeat(2, 1fr); }
 }

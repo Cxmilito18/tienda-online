@@ -77,6 +77,7 @@ const FORM_VACIO = {
   imagen_url: '',
   stock: '',
   stock_minimo: '',
+  descuento: '',
   imagenes: [], // fotos adicionales ya guardadas (URLs)
 }
 
@@ -187,6 +188,7 @@ function AdminPanel() {
       imagen_url: p.imagen_url || '',
       stock: String(p.stock ?? ''),
       stock_minimo: String(p.stock_minimo ?? ''),
+      descuento: String(p.descuento ?? ''),
       imagenes: p.imagenes || [],
     })
     setNuevasFotos([])
@@ -240,6 +242,7 @@ function AdminPanel() {
         imagen_url,
         stock: Number(form.stock) || 0,
         stock_minimo: Number(form.stock_minimo) || 0,
+        descuento: Math.min(100, Math.max(0, Number(form.descuento) || 0)),
         imagenes,
       }
 
@@ -435,6 +438,22 @@ function AdminPanel() {
         </div>
 
         <div className="field">
+          <label>Descuento (%)</label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            value={form.descuento}
+            onChange={(e) => setField('descuento', e.target.value)}
+            placeholder="0 = sin descuento. Ej. 50 para 50% off"
+          />
+          <p className="hint">
+            Pon un número del 1 al 100 (ej. 20, 50, 100). Deja en 0 o vacío
+            para quitar el descuento.
+          </p>
+        </div>
+
+        <div className="field">
           <label>Imagen del producto</label>
           <div className="tabs">
             {editando && (
@@ -582,6 +601,9 @@ function AdminPanel() {
                   {(p.stock ?? 0) === 0
                     ? '● Agotado'
                     : `● Stock: ${p.stock}`}
+                  {(p.descuento ?? 0) > 0 && (
+                    <span className="descuento-tag">-{p.descuento}%</span>
+                  )}
                 </span>
               </div>
               <div className="admin-actions">

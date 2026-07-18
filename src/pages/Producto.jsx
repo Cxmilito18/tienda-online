@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
-import { formatPrecio } from '../lib/format.js'
+import { formatPrecio, precioFinal, tieneDescuento } from '../lib/format.js'
 import { useCart } from '../context/CartContext.jsx'
 import Lightbox from '../components/Lightbox.jsx'
 import Resenas from '../components/Resenas.jsx'
@@ -68,6 +68,8 @@ export default function Producto() {
   const agotado = stock === 0
   const pocasUnidades = !agotado && stock <= stockMinimo
   const fotoActual = fotos[activa] || fotos[0]
+  const conDescuento = tieneDescuento(producto)
+  const precio = precioFinal(producto)
 
   return (
     <div className="detalle-wrap">
@@ -117,7 +119,21 @@ export default function Producto() {
             <span className="detalle-cat">{producto.categoria_nombre}</span>
           )}
           <h1>{producto.nombre}</h1>
-          <div className="detalle-precio">{formatPrecio(producto.precio)}</div>
+          <div className="detalle-precio-row">
+            {conDescuento && (
+              <>
+                <span className="precio-tachado">
+                  {formatPrecio(producto.precio)}
+                </span>
+                <span className="detalle-descuento">
+                  -{producto.descuento}%
+                </span>
+              </>
+            )}
+            <div className="detalle-precio">
+              {precio === 0 ? '¡GRATIS!' : formatPrecio(precio)}
+            </div>
+          </div>
 
           {agotado ? (
             <span className="detalle-stock agotado">Agotado por ahora</span>

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { formatPrecio } from '../lib/format.js'
+import { formatPrecio, precioFinal, tieneDescuento } from '../lib/format.js'
 import { useCart } from '../context/CartContext.jsx'
 
 const PLACEHOLDER =
@@ -14,6 +14,8 @@ export default function ProductCard({ producto }) {
   const agotado = stock === 0
   const pocasUnidades = !agotado && stock <= stockMinimo
   const numFotos = 1 + (producto.imagenes?.length || 0)
+  const conDescuento = tieneDescuento(producto)
+  const precio = precioFinal(producto)
 
   function verDetalle() {
     navigate(`/producto/${producto.id}`)
@@ -24,6 +26,9 @@ export default function ProductCard({ producto }) {
       <div className="card-img" onClick={verDetalle} title="Ver producto">
         {producto.categoria_nombre && (
           <span className="card-cat">{producto.categoria_nombre}</span>
+        )}
+        {conDescuento && (
+          <span className="card-descuento">-{producto.descuento}%</span>
         )}
         {agotado && <span className="card-agotado-badge">Agotado</span>}
         <img
@@ -41,7 +46,14 @@ export default function ProductCard({ producto }) {
         {producto.descripcion && (
           <p className="card-desc">{producto.descripcion}</p>
         )}
-        <div className="card-precio">{formatPrecio(producto.precio)}</div>
+        <div className="card-precio">
+          {conDescuento && (
+            <span className="precio-tachado">
+              {formatPrecio(producto.precio)}
+            </span>
+          )}
+          {precio === 0 ? '¡GRATIS!' : formatPrecio(precio)}
+        </div>
         {pocasUnidades && (
           <span className="card-pocas">
             {stock === 1 ? '¡Última unidad!' : `¡Últimas ${stock} unidades!`}

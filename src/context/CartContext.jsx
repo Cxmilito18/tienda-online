@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react'
+import { precioFinal } from '../lib/format.js'
 
 const CartContext = createContext()
 
@@ -14,7 +15,11 @@ export function CartProvider({ children }) {
           i.id === producto.id ? { ...i, cantidad: i.cantidad + 1 } : i
         )
       }
-      return [...prev, { ...producto, cantidad: 1 }]
+      // El carrito guarda el precio ya con descuento aplicado
+      return [
+        ...prev,
+        { ...producto, precio: precioFinal(producto), cantidad: 1 },
+      ]
     })
     setOpen(true)
   }
