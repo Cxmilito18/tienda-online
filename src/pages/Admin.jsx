@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase, STORAGE_BUCKET } from '../lib/supabase.js'
 import { formatPrecio } from '../lib/format.js'
 import AdminResenas from '../components/AdminResenas.jsx'
+import AdminPedidos from '../components/AdminPedidos.jsx'
+import AdminZonas from '../components/AdminZonas.jsx'
 
 export default function Admin() {
   const [session, setSession] = useState(undefined) // undefined = cargando
@@ -303,6 +305,12 @@ function AdminPanel() {
         </button>
       </div>
       <p className="sub">Gestiona productos y categorías de tu tienda.</p>
+
+      {/* ---- PEDIDOS (ventas) ---- */}
+      <AdminPedidos />
+
+      {/* ---- ZONAS DE ENVÍO ---- */}
+      <AdminZonas />
 
       {/* ---- ALERTA DE REABASTECIMIENTO ---- */}
       {porReabastecer.length > 0 && (

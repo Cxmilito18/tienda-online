@@ -1,30 +1,17 @@
-import { STORE } from '../lib/config.js'
+import { useNavigate } from 'react-router-dom'
 import { formatPrecio } from '../lib/format.js'
 import { useCart } from '../context/CartContext.jsx'
 
 export default function CartDrawer() {
   const { items, remove, setQty, total, clear, open, setOpen } = useCart()
+  const navigate = useNavigate()
 
   if (!open) return null
 
-  function checkout() {
+  function irACheckout() {
     if (items.length === 0) return
-    const lineas = items
-      .map(
-        (i) =>
-          `• ${i.cantidad} x ${i.nombre} — ${formatPrecio(
-            i.precio * i.cantidad
-          )}`
-      )
-      .join('\n')
-    const texto =
-      `¡Hola ${STORE.nombre}! Quiero hacer este pedido:\n\n` +
-      lineas +
-      `\n\n*Total: ${formatPrecio(total)}*`
-    const url = `https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(
-      texto
-    )}`
-    window.open(url, '_blank')
+    setOpen(false)
+    navigate('/checkout')
   }
 
   return (
@@ -79,8 +66,8 @@ export default function CartDrawer() {
               <span>Total</span>
               <span>{formatPrecio(total)}</span>
             </div>
-            <button className="btn btn-acento btn-block" onClick={checkout}>
-              Pedir por WhatsApp
+            <button className="btn btn-acento btn-block" onClick={irACheckout}>
+              Finalizar compra
             </button>
             <button
               className="btn btn-ghost btn-block"

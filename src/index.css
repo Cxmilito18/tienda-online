@@ -607,6 +607,88 @@ img { display: block; max-width: 100%; }
   font-size: 0.72rem; font-weight: 800; padding: 1px 8px; border-radius: 999px;
 }
 
+/* ---- FASE 4: PEDIDOS ---- */
+/* Checkout (cliente) */
+.checkout-wrap { max-width: 900px; margin: 0 auto; padding: 24px 20px 60px; }
+.checkout-titulo { font-size: 1.6rem; font-weight: 800; margin: 6px 0 20px; }
+.checkout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.checkout-resumen, .checkout-form {
+  background: var(--color-superficie); border: 1px solid var(--gris-borde);
+  border-radius: var(--radio); padding: 20px;
+}
+.checkout-resumen h3, .checkout-form h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 14px; }
+.checkout-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--gris-borde); }
+.checkout-item img { width: 46px; height: 46px; border-radius: 8px; object-fit: cover; background: var(--color-fondo); }
+.checkout-item-info { flex: 1; display: flex; flex-direction: column; }
+.checkout-item-info span { font-size: 0.9rem; font-weight: 600; }
+.checkout-item-info small { color: var(--gris-texto); font-size: 0.8rem; }
+.checkout-item strong { font-size: 0.9rem; }
+.checkout-total { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.15rem; margin-top: 14px; color: var(--color-primario); }
+
+.checkout-ok { max-width: 480px; margin: 40px auto; text-align: center; background: var(--color-superficie); border: 1px solid var(--gris-borde); border-radius: var(--radio); padding: 36px 28px; box-shadow: var(--sombra); }
+.checkout-ok .check-ico { font-size: 3rem; }
+.checkout-ok h1 { font-size: 1.6rem; font-weight: 800; margin: 8px 0; }
+.checkout-ok .pedido-num { display: inline-block; background: rgba(26,44,91,0.08); color: var(--color-primario); font-weight: 800; padding: 4px 14px; border-radius: 999px; margin-bottom: 8px; }
+.checkout-ok-msg { color: var(--gris-texto); line-height: 1.6; margin: 14px 0 22px; }
+
+/* Panel de pedidos (admin) */
+.pedidos-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.pedidos-total { font-size: 0.95rem; }
+.pedidos-total strong { color: var(--color-primario); font-size: 1.05rem; }
+.pedidos-lista { display: flex; flex-direction: column; gap: 12px; }
+.pedido { border: 1px solid var(--gris-borde); border-left: 4px solid var(--gris-borde); border-radius: var(--radio-sm); padding: 14px; background: #fff; }
+.pedido.estado-pendiente { border-left-color: #f59e0b; }
+.pedido.estado-confirmado { border-left-color: #3b82f6; }
+.pedido.estado-enviado { border-left-color: #8b5cf6; }
+.pedido.estado-entregado { border-left-color: #16a34a; }
+.pedido.estado-cancelado { border-left-color: #9ca3af; opacity: 0.7; }
+.pedido-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.pedido-top strong { font-size: 1rem; }
+.pedido-fecha { font-size: 0.78rem; color: var(--gris-texto); margin-left: 8px; }
+.pedido-monto { font-weight: 800; color: var(--color-primario); }
+.pedido-cliente { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0; font-size: 0.85rem; color: #374151; }
+.pedido-notas { width: 100%; color: var(--gris-texto); }
+.pedido-items { margin: 6px 0 10px; padding-left: 18px; }
+.pedido-items li { font-size: 0.85rem; color: #374151; margin-top: 2px; }
+.pedido-acciones { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.pedido-acciones label { font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.pedido-acciones select { padding: 6px 10px; border: 1px solid var(--gris-borde); border-radius: 8px; }
+
+/* Líneas del resumen (subtotal / envío) */
+.checkout-linea { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--gris-texto); padding: 4px 0; }
+.checkout-linea + .checkout-total { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--gris-borde); }
+
+/* Selector de método de entrega */
+.metodo-entrega { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.metodo-opcion {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  border: 2px solid var(--gris-borde); border-radius: var(--radio-sm);
+  padding: 12px; background: #fff; text-align: left; font-weight: 700;
+  font-size: 0.9rem; color: var(--color-texto);
+}
+.metodo-opcion small { font-weight: 500; color: var(--gris-texto); font-size: 0.78rem; }
+.metodo-opcion.active { border-color: var(--color-primario); background: rgba(26,44,91,0.04); }
+
+/* Zonas de envío en el admin */
+.zona-nueva { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.zona-nueva input:first-child { flex: 1; min-width: 160px; }
+.zona-nueva input[type="number"] { width: 120px; }
+.zonas-lista { display: flex; flex-direction: column; gap: 8px; }
+.zona-item {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border: 1px solid var(--gris-borde); border-radius: var(--radio-sm);
+  padding: 8px 12px; background: #fff;
+}
+.zona-nombre { flex: 1; font-weight: 700; font-size: 0.9rem; min-width: 120px; }
+.zona-costo { display: inline-flex; align-items: center; gap: 4px; }
+.zona-costo input { width: 100px; }
+.zona-costo-fmt { font-size: 0.82rem; color: var(--gris-texto); min-width: 70px; }
+
+@media (max-width: 700px) {
+  .checkout { grid-template-columns: 1fr; }
+  .metodo-entrega { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 860px) {
   .beneficios-grid { grid-template-columns: repeat(2, 1fr); }
 }

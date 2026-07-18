@@ -27,6 +27,9 @@ export const STORE = {
   // WhatsApp con código de país, SIN + ni espacios. Colombia = 57.
   whatsapp: '573001234567',
 
+  // Texto del punto de recogida (para el método "recoger").
+  lugarRecogida: 'la escuela',
+
   // Moneda
   moneda: 'COP',
   simboloMoneda: '$',
