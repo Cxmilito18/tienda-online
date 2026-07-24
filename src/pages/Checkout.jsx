@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase.js'
+import { supabase, COMPROBANTES_BUCKET } from '../lib/supabase.js'
 import { STORE } from '../lib/config.js'
 import { formatPrecio } from '../lib/format.js'
 import { useCart } from '../context/CartContext.jsx'
@@ -18,6 +18,9 @@ export default function Checkout() {
   const [zonas, setZonas] = useState([])
   const [zonaId, setZonaId] = useState('')
 
+  const [metodosPago, setMetodosPago] = useState([])
+  const [pagoId, setPagoId] = useState('')
+
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState('')
   const [confirmado, setConfirmado] = useState(null)
@@ -28,11 +31,18 @@ export default function Checkout() {
       .select('*')
       .order('nombre')
       .then(({ data }) => setZonas(data || []))
+
+    supabase
+      .from('metodos_pago')
+      .select('*')
+      .order('created_at')
+      .then(({ data }) => setMetodosPago(data || []))
   }, [])
 
   const zonaSel = zonas.find((z) => z.id === zonaId)
   const costoEnvio = metodo === 'envio' && zonaSel ? Number(zonaSel.costo) : 0
   const total = subtotal + costoEnvio
+  const pagoSel = metodosPago.find((m) => m.id === pagoId)
 
   async function confirmar() {
     setError('')
@@ -41,6 +51,9 @@ export default function Checkout() {
     if (metodo === 'envio') {
       if (!zonaId) return setError('Elige tu zona de envío.')
       if (!direccion.trim()) return setError('Escribe tu dirección de entrega.')
+    }
+    if (metodosPago.length > 0 && !pagoId) {
+      return setError('Elige cómo vas a pagar.')
     }
 
     setEnviando(true)
@@ -52,6 +65,7 @@ export default function Checkout() {
       p_items: items.map((i) => ({ producto_id: i.id, cantidad: i.cantidad })),
       p_metodo_entrega: metodo,
       p_zona_id: metodo === 'envio' ? zonaId : null,
+      p_metodo_pago_id: pagoId || null,
     })
     setEnviando(false)
 
@@ -59,11 +73,11 @@ export default function Checkout() {
       setError(e.message || 'No se pudo crear el pedido. Intenta de nuevo.')
       return
     }
-    setConfirmado(data)
+    setConfirmado({ ...data, pago: pagoSel || null })
     clear()
   }
 
-  // ---- Confirmación ----
+  // ---- Confirmación + instrucciones de pago ----
   if (confirmado) {
     return (
       <div className="checkout-wrap">
@@ -72,13 +86,16 @@ export default function Checkout() {
           <h1>¡Pedido recibido!</h1>
           <p className="pedido-num">Pedido #{confirmado.numero}</p>
           <p>
-            Total: <strong>{formatPrecio(confirmado.total)}</strong>
+            Total a pagar: <strong>{formatPrecio(confirmado.total)}</strong>
           </p>
-          <p className="checkout-ok-msg">
-            Guardamos tu pedido. Te contactaremos pronto para coordinar el
-            pago y la entrega. ¡Gracias por tu compra! 🏀
-          </p>
-          <Link className="btn btn-acento" to="/">
+        </div>
+
+        {confirmado.pago && (
+          <PasoPago pedidoId={confirmado.id} pago={confirmado.pago} />
+        )}
+
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <Link className="btn btn-ghost" to="/">
             Volver a la tienda
           </Link>
         </div>
@@ -190,7 +207,6 @@ export default function Checkout() {
             </div>
           </div>
 
-          {/* Campos solo para envío */}
           {metodo === 'envio' && (
             <>
               <div className="field">
@@ -225,6 +241,26 @@ export default function Checkout() {
             </>
           )}
 
+          {/* Método de pago */}
+          {metodosPago.length > 0 && (
+            <div className="field">
+              <label>¿Cómo vas a pagar? *</label>
+              <div className="pagos-opciones">
+                {metodosPago.map((m) => (
+                  <button
+                    type="button"
+                    key={m.id}
+                    className={`metodo-opcion ${pagoId === m.id ? 'active' : ''}`}
+                    onClick={() => setPagoId(m.id)}
+                  >
+                    💳 {m.nombre}
+                    {m.titular && <small>{m.titular}</small>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="field">
             <label>Notas (opcional)</label>
             <textarea
@@ -243,6 +279,94 @@ export default function Checkout() {
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+/* ---------------- PASO DE PAGO ---------------- */
+function PasoPago({ pedidoId, pago }) {
+  const [archivo, setArchivo] = useState(null)
+  const [subiendo, setSubiendo] = useState(false)
+  const [listo, setListo] = useState(false)
+  const [err, setErr] = useState('')
+
+  async function subirComprobante() {
+    if (!archivo) return setErr('Elige la imagen de tu comprobante.')
+    setErr('')
+    setSubiendo(true)
+    try {
+      const ext = archivo.name.split('.').pop()
+      const path = `${pedidoId}-${Date.now()}.${ext}`
+      const { error: upErr } = await supabase.storage
+        .from(COMPROBANTES_BUCKET)
+        .upload(path, archivo)
+      if (upErr) throw upErr
+
+      const { error: rpcErr } = await supabase.rpc('reportar_pago', {
+        p_pedido_id: pedidoId,
+        p_comprobante: path,
+      })
+      if (rpcErr) throw rpcErr
+
+      setListo(true)
+    } catch (e) {
+      setErr('No se pudo subir el comprobante. Intenta de nuevo.')
+    } finally {
+      setSubiendo(false)
+    }
+  }
+
+  return (
+    <div className="pago-card">
+      <h2>Cómo pagar</h2>
+      <div className="pago-metodo">
+        <strong>{pago.nombre}</strong>
+        {pago.titular && (
+          <span>
+            A nombre de: <strong>{pago.titular}</strong>
+          </span>
+        )}
+        {pago.numero && (
+          <span className="pago-numero">{pago.numero}</span>
+        )}
+        {pago.instrucciones && <p>{pago.instrucciones}</p>}
+        {pago.qr_url && (
+          <img className="pago-qr" src={pago.qr_url} alt="Código QR de pago" />
+        )}
+      </div>
+
+      {pago.requiere_comprobante && (
+        <div className="pago-comprobante">
+          {listo ? (
+            <div className="msg msg-ok">
+              ✅ ¡Comprobante recibido! Vamos a verificar tu pago y te
+              confirmamos pronto.
+            </div>
+          ) : (
+            <>
+              <h3>Sube tu comprobante</h3>
+              <p className="hint">
+                Toma una captura de la transferencia y súbela aquí para que
+                validemos tu pago.
+              </p>
+              {err && <div className="msg msg-err">{err}</div>}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setArchivo(e.target.files?.[0] || null)}
+              />
+              <button
+                className="btn btn-acento btn-block"
+                style={{ marginTop: 10 }}
+                onClick={subirComprobante}
+                disabled={subiendo}
+              >
+                {subiendo ? 'Subiendo...' : 'Enviar comprobante'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }

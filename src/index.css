@@ -684,9 +684,75 @@ img { display: block; max-width: 100%; }
 .zona-costo input { width: 100px; }
 .zona-costo-fmt { font-size: 0.82rem; color: var(--gris-texto); min-width: 70px; }
 
+/* ---- FASE 5: PAGOS ---- */
+/* Opciones de método de pago en el checkout */
+.pagos-opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Tarjeta "cómo pagar" (después de confirmar el pedido) */
+.pago-card {
+  max-width: 480px; margin: 20px auto 0; background: var(--color-superficie);
+  border: 1px solid var(--gris-borde); border-radius: var(--radio);
+  padding: 24px; box-shadow: var(--sombra);
+}
+.pago-card h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 14px; }
+.pago-metodo { display: flex; flex-direction: column; gap: 6px; text-align: center; }
+.pago-metodo > strong:first-child { font-size: 1.1rem; color: var(--color-primario); }
+.pago-metodo p { color: var(--gris-texto); font-size: 0.88rem; line-height: 1.5; margin-top: 4px; }
+.pago-numero {
+  font-size: 1.15rem; font-weight: 800; letter-spacing: 0.02em;
+  background: var(--color-fondo); border: 1px dashed var(--gris-borde);
+  border-radius: var(--radio-sm); padding: 8px 12px; margin: 4px 0;
+  word-break: break-all;
+}
+.pago-qr {
+  display: block; max-width: 220px; width: 100%; margin: 12px auto 0;
+  border-radius: var(--radio-sm); border: 1px solid var(--gris-borde);
+}
+.pago-comprobante { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--gris-borde); }
+.pago-comprobante h3 { font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+
+/* Estado del pago en el panel de pedidos */
+.pedido-pago {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin: 8px 0 10px; padding: 8px 0; border-top: 1px dashed var(--gris-borde);
+}
+.pago-badge { font-size: 0.8rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; }
+.pago-badge.pendiente { background: #fef3c7; color: #92400e; }
+.pago-badge.reportado { background: #dbeafe; color: #1e40af; }
+.pago-badge.verificado { background: #dcfce7; color: #166534; }
+
+/* Métodos de pago en el admin */
+.pagos-lista { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.pago-item {
+  display: flex; align-items: center; gap: 12px; background: #fff;
+  border: 1px solid var(--gris-borde); border-radius: var(--radio-sm); padding: 12px;
+}
+.pago-item.inactivo { opacity: 0.6; }
+.pago-item-qr { width: 54px; height: 54px; object-fit: cover; border-radius: 8px; }
+.pago-item-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.pago-item-info strong { font-size: 0.95rem; }
+.pago-item-info span { font-size: 0.85rem; color: #374151; }
+.pago-item-info small { font-size: 0.8rem; color: var(--gris-texto); }
+.pago-item-info .pago-numero {
+  font-size: 0.9rem; padding: 4px 8px; margin: 2px 0; align-self: flex-start;
+}
+.tag-inactivo {
+  margin-left: 8px; background: var(--gris-borde); color: var(--gris-texto);
+  font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px;
+}
+.pago-form { border-top: 1px solid var(--gris-borde); padding-top: 16px; }
+.pago-form h4 { font-size: 0.95rem; font-weight: 800; margin-bottom: 12px; }
+.check-linea {
+  display: flex; align-items: center; gap: 8px; font-size: 0.88rem;
+  font-weight: 600; margin-bottom: 14px; cursor: pointer;
+}
+.check-linea input { width: auto; }
+.check-linea small { font-weight: 500; color: var(--gris-texto); }
+
 @media (max-width: 700px) {
   .checkout { grid-template-columns: 1fr; }
   .metodo-entrega { grid-template-columns: 1fr; }
+  .pagos-opciones { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 860px) {

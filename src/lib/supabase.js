@@ -7,3 +7,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Bucket de Storage donde se guardan las fotos de productos
 export const STORAGE_BUCKET = 'productos'
+
+// Bucket PRIVADO de los comprobantes de pago (solo el admin los ve)
+export const COMPROBANTES_BUCKET = 'comprobantes'

@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase.js'
+import { supabase, COMPROBANTES_BUCKET } from '../lib/supabase.js'
+import { STORE } from '../lib/config.js'
 import { formatPrecio } from '../lib/format.js'
 
 const ESTADOS = ['pendiente', 'confirmado', 'enviado', 'entregado', 'cancelado']
+
+const PAGO_TEXTO = {
+  pendiente: '⏳ Sin pagar',
+  reportado: '📸 Comprobante recibido',
+  verificado: '✅ Pago verificado',
+}
 
 export default function AdminPedidos() {
   const [pedidos, setPedidos] = useState([])
@@ -33,6 +40,26 @@ export default function AdminPedidos() {
     if (!confirm('¿Eliminar este pedido? No se puede deshacer.')) return
     await supabase.from('pedidos').delete().eq('id', id)
     cargar()
+  }
+
+  async function cambiarPago(id, pago_estado) {
+    await supabase.from('pedidos').update({ pago_estado }).eq('id', id)
+    setPedidos((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, pago_estado } : p))
+    )
+  }
+
+  // Los comprobantes están en un bucket privado: se abre con un
+  // enlace temporal que solo funciona para ti.
+  async function verComprobante(path) {
+    const { data, error } = await supabase.storage
+      .from(COMPROBANTES_BUCKET)
+      .createSignedUrl(path, 60)
+    if (error || !data?.signedUrl) {
+      alert('No se pudo abrir el comprobante.')
+      return
+    }
+    window.open(data.signedUrl, '_blank', 'noopener')
   }
 
   function formatFecha(iso) {
@@ -94,10 +121,40 @@ export default function AdminPedidos() {
                     {formatPrecio(p.costo_envio)})
                   </span>
                 ) : (
-                  <span>🏫 Recoge en tienda</span>
+                  <span>🏫 Recoge en {STORE.lugarRecogida}</span>
                 )}
                 {p.cliente_direccion && <span>📍 {p.cliente_direccion}</span>}
+                {p.metodo_pago && <span>💳 {p.metodo_pago}</span>}
                 {p.notas && <span className="pedido-notas">📝 {p.notas}</span>}
+              </div>
+
+              <div className="pedido-pago">
+                <span className={`pago-badge ${p.pago_estado}`}>
+                  {PAGO_TEXTO[p.pago_estado] || p.pago_estado}
+                </span>
+                {p.comprobante_url && (
+                  <button
+                    className="edit-btn"
+                    onClick={() => verComprobante(p.comprobante_url)}
+                  >
+                    Ver comprobante
+                  </button>
+                )}
+                {p.pago_estado !== 'verificado' ? (
+                  <button
+                    className="aprobar-btn"
+                    onClick={() => cambiarPago(p.id, 'verificado')}
+                  >
+                    Marcar pago verificado
+                  </button>
+                ) : (
+                  <button
+                    className="edit-btn"
+                    onClick={() => cambiarPago(p.id, 'pendiente')}
+                  >
+                    Deshacer
+                  </button>
+                )}
               </div>
 
               <ul className="pedido-items">

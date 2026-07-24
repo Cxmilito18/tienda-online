@@ -4,6 +4,7 @@ import { formatPrecio } from '../lib/format.js'
 import AdminResenas from '../components/AdminResenas.jsx'
 import AdminPedidos from '../components/AdminPedidos.jsx'
 import AdminZonas from '../components/AdminZonas.jsx'
+import AdminMetodosPago from '../components/AdminMetodosPago.jsx'
 
 export default function Admin() {
   const [session, setSession] = useState(undefined) // undefined = cargando
@@ -308,6 +309,9 @@ function AdminPanel() {
 
       {/* ---- PEDIDOS (ventas) ---- */}
       <AdminPedidos />
+
+      {/* ---- MÉTODOS DE PAGO ---- */}
+      <AdminMetodosPago />
 
       {/* ---- ZONAS DE ENVÍO ---- */}
       <AdminZonas />
