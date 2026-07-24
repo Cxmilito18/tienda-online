@@ -28,7 +28,7 @@ export const STORE = {
   whatsapp: '573001234567',
 
   // Texto del punto de recogida (para el método "recoger").
-  lugarRecogida: 'la escuela',
+  lugarRecogida: 'Pumas',
 
   // Moneda
   moneda: 'COP',
